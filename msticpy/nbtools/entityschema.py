@@ -12,7 +12,7 @@ import pprint
 from abc import ABC, abstractmethod
 from enum import Enum
 from ipaddress import IPv4Address, IPv6Address, ip_address
-from typing import Any, Dict, Mapping, Type, Union
+from typing import Any, Dict, Mapping, Type, Union, Optional
 
 from .._version import VERSION
 from ..common.utility import export
@@ -160,11 +160,11 @@ class Entity(ABC):
 
     def _to_dict(self, entity) -> dict:
         """Return as simple nested dictionary."""
-        ent_dict = {}
-        for prop, val in entity.properties.items():
-            if val is not None:
-                ent_dict[prop] = self._to_dict(val) if isinstance(val, Entity) else val
-        return ent_dict
+        return {
+            prop: self._to_dict(val) if isinstance(val, Entity) else val
+            for prop, val in entity.properties.items()
+            if val is not None
+        }
 
     def _repr_html_(self) -> str:
         """
@@ -592,7 +592,7 @@ class CloudApplication(Entity):
 
 
 @export
-class DnsResolve(Entity):
+class Dns(Entity):
     """
     DNS Resolve Entity class.
 
@@ -767,6 +767,37 @@ class File(Entity):
         self.FullPath = full_path
         self.Name = full_path.split(self.PathSeparator)[-1]
         self.Directory = full_path.split(self.PathSeparator)[:-1]
+
+    @property
+    def file_hash(self) -> str:
+        """
+        Return the first defined file hash.
+
+        Returns
+        -------
+        str
+            Returns first-defined file hash in order of
+            SHA256, SHA1, MD5, SHA256AC (authenticode)
+        """
+
+        def _get_hash_of_type(file_hashes, alg):
+            return any(hash for hash in file_hashes if hash.Algorithm == alg)
+
+        alg_order = (
+            Algorithm.Sha256,
+            Algorithm.Sha1,
+            Algorithm.Md5,
+            Algorithm.Sha256Ac,
+        )
+        file_hashes = getattr(self, "FileHashes")
+
+        if file_hashes:
+            for alg in alg_order:
+                hash = _get_hash_of_type(file_hashes, alg)
+                if hash:
+                    return hash
+
+        return self.Sha256 or self.Sha1 or self.Md5 or self.Sha256Ac
 
 
 @export
@@ -1694,6 +1725,26 @@ class Threatintelligence(Entity):
 
 
 @export
+class Url(Entity):
+    def __init__(self, src_entity: Mapping[str, Any] = None, **kwargs):
+        """
+        Create a new instance of the entity type.
+
+            :param src_entity: instantiate entity using properties of src entity
+            :param kwargs: key-value pair representation of entity
+        """
+        self.Url: Optional[str] = None
+        super().__init__(src_entity=src_entity, **kwargs)
+
+    @property
+    def description_str(self) -> str:
+        """Return Entity Description."""
+        return f"{self.Url}"
+
+    _entity_schema = {}
+
+
+@export
 class UnknownEntity(Entity):
     """Generic Entity class."""
 
@@ -1722,7 +1773,7 @@ Entity.ENTITY_NAME_MAP.update(
         "process": Process,
         "file": File,
         "cloudapplication": CloudApplication,
-        "dnsresolve": DnsResolve,
+        "dns": Dns,
         "ipaddress": IpAddress,
         "ip": IpAddress,
         "networkconnection": NetworkConnection,

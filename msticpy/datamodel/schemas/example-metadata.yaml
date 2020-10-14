@@ -1,0 +1,7 @@
+metadata:
+  query_keys:
+    ip: IpAddress
+    Computer: Host
+    Account: Account
+    SubjectUserName: Account
+    TargetUserName: Account

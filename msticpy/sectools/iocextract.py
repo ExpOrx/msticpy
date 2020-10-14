@@ -62,6 +62,7 @@ class IoCType(Enum):
     email = "email"
     windows_path = "windows_path"
     linux_path = "linux_path"
+    file_path = "file_path"
     hostname = "hostname"
 
     @classmethod

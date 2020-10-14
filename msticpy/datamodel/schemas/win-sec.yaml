@@ -1,0 +1,9 @@
+columns:
+  types:
+    - TimeGenerated: datetime
+    - Computer: str
+  common:
+    - TimeGenerated
+    - Computer
+    - EventID
+  summary:

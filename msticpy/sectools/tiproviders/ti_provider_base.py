@@ -339,6 +339,24 @@ class TIProvider(ABC):
         return [ioc.name for ioc in self._supported_types]
 
     @classmethod
+    def get_supported_type_queries(cls) -> List[Tuple[str, str]]:
+        """
+        Return IoC types and query types supported by provider.
+
+        Returns
+        -------
+        List[Tuple[str, str]]
+            list of (ioc_type, query_type)
+
+        """
+        return [
+            (ioc_type, query)
+            for ioc_type, _, query in [
+                ioc_query.partition("-") for ioc_query in cls._IOC_QUERIES
+            ]
+        ]
+
+    @classmethod
     def is_known_type(cls, ioc_type: str) -> bool:
         """
         Return True if this a known IoC Type.

@@ -35,7 +35,7 @@ class AzSTI(KqlTIProvider):
             "ThreatIntelligence.list_indicators_by_hash",
             {"ioc": "observables"},
         ),
-        "windows_path": (
+        "file_path": (
             "ThreatIntelligence.list_indicators_by_filepath",
             {"ioc": "observables"},
         ),
@@ -48,7 +48,8 @@ class AzSTI(KqlTIProvider):
     _IOC_QUERIES["md5_hash"] = _IOC_QUERIES["file_hash"]
     _IOC_QUERIES["sha1_hash"] = _IOC_QUERIES["file_hash"]
     _IOC_QUERIES["sha256_hash"] = _IOC_QUERIES["file_hash"]
-    _IOC_QUERIES["linux_path"] = _IOC_QUERIES["windows_path"]
+    _IOC_QUERIES["linux_path"] = _IOC_QUERIES["file_path"]
+    _IOC_QUERIES["windows_path"] = _IOC_QUERIES["file_path"]
     _IOC_QUERIES["hostname"] = _IOC_QUERIES["dns"]
 
     def parse_results(self, response: LookupResult) -> Tuple[bool, TISeverity, Any]:

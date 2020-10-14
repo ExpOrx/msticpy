@@ -45,6 +45,19 @@ def extract_query_params(
     # get the parameters for this query
     all_params = query_source.params
 
+    def _get_alias_set(p_attr):
+        return (
+            {p_attr["aliases"]}
+            if isinstance(p_attr["aliases"], str)
+            else set(p_attr["aliases"])
+        )
+
+    param_aliases = {
+        p_name: _get_alias_set(p_attr)
+        for p_name, p_attr in all_params.items()
+        if "aliases" in p_attr
+    }
+
     # required_params are those that don't have defaults set in the query
     # template. Build a dictionary to hold the values. This will contain
     # at least the required params plus any that are extracted from args and
